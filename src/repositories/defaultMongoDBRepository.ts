@@ -27,10 +27,10 @@ export abstract class DefaultMongoDBRepository<
     }
   }
 
-  async findOne(options: FilterOptions) {
+  async findOne(options: FilterOptions): Promise<WithId<T> | undefined> {
     try {
       const data = await this.model.findOne(options);
-      return data?.toJSON<WithId<T>>();
+      return data ? ({ ...data.toJSON(), id: data._id.toString() } as unknown as WithId<T>) : undefined;
     } catch (error) {
       this.handleError(error);
     }
@@ -39,7 +39,7 @@ export abstract class DefaultMongoDBRepository<
   async find(filter: FilterOptions) {
     try {
       const data = await this.model.find(filter);
-      return data.map((d) => d.toJSON<WithId<T>>());
+      return data.map((d) => ({ ...d.toJSON(), id: d._id.toString() }));
     } catch (error) {
       this.handleError(error);
     }

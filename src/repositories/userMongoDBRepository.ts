@@ -1,6 +1,6 @@
 import { DefaultMongoDBRepository } from './defaultMongoDBRepository';
 import { User } from '../models/user';
-import { UserRepository } from '.';
+import { UserRepository, WithId } from '.';
 
 export class UserMongoDBRepository
   extends DefaultMongoDBRepository<User>
@@ -10,8 +10,10 @@ export class UserMongoDBRepository
     super(userModel);
   }
 
-  async findOneById(id: string) {
-    return this.findOne({ _id: id });
+  async findOneById(id: string): Promise<WithId<User> | undefined> {
+    const result = await this.findOne({ _id: id });
+    if (!result) return undefined;
+    return { ...result, id: result._id.toString() } as WithId<User>;
   }
 
   async findOneByEmail(email: string) {
